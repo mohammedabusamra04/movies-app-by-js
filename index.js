@@ -15,3 +15,9 @@ function readMovies(callback) {
         }
     });
 }
+//Write Movies Data
+function writeMovies(movies, callback) {
+    fs.writeFile(path, JSON.stringify(movies, null, 2), (err) => {
+        callback(err);
+    });
+}
