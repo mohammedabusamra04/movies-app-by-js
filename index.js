@@ -36,8 +36,20 @@ function getRequestBody(req, callback) {
 }
 //// Build a Node.js Server
 const server = http.createServer((req, res) => {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end("Server is running");
+    const urlParts = req.url.split("/");
+    const id = urlParts[2] ? parseInt(urlParts[2]) : null;
+
+    // Get all movies
+    if (req.method === "GET" && req.url === "/movies") {
+        readMovies((err, movies) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "text/plain" });
+                return res.end("Error reading file");
+            }
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(movies));
+        });
+    }
 });
 
 const port = 2500;
