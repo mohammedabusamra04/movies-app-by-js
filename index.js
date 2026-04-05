@@ -34,3 +34,13 @@ function getRequestBody(req, callback) {
         }
     });
 }
+//// Build a Node.js Server
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("Server is running");
+});
+
+const port = 2500;
+server.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
+});
