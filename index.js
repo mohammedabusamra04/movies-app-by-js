@@ -50,6 +50,29 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify(movies));
         });
     }
+    // Get one movie by ID
+    else if (req.method === "GET" && req.url.startsWith("/movies/")) {
+        if (!id) {
+            res.writeHead(400, { "Content-Type": "text/plain" });
+            return res.end("Invalid ID");
+        }
+
+        readMovies((err, movies) => {
+            if (err) {
+                res.writeHead(500, { "Content-Type": "text/plain" });
+                return res.end("Error reading file");
+            }
+
+            const movie = movies.find(m => m.id === id);
+            if (!movie) {
+                res.writeHead(404, { "Content-Type": "text/plain" });
+                return res.end("Movie not found");
+            }
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(movie));
+        });
+    }
 });
 
 const port = 2500;
