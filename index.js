@@ -21,3 +21,16 @@ function writeMovies(movies, callback) {
         callback(err);
     });
 }
+// get body from Request Data
+function getRequestBody(req, callback) {
+    let body = "";
+    req.on("data", chunk => body += chunk);
+    req.on("end", () => {
+        try {
+            const data = JSON.parse(body);
+            callback(null, data);
+        } catch (err) {
+            callback(err, null);
+        }
+    });
+}
