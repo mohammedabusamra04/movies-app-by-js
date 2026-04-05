@@ -139,7 +139,34 @@ else if (req.method === "PATCH" && req.url.startsWith("/movies/")) {
         });
     });
 }
+ // Delete a movie
+    else if (req.method === "DELETE" && req.url.startsWith("/movies/")) {
+        if (!id) {
+            res.writeHead(400, { "Content-Type": "text/plain" });
+            return res.end("Invalid ID");
+        }
 
+        readMovies((err, movies) => {
+            if (err) return res.writeHead(500, { "Content-Type": "text/plain" }).end("Error reading file");
+
+            const filteredMovies = movies.filter(m => m.id !== id);
+            if (filteredMovies.length === movies.length) return res.writeHead(404, { "Content-Type": "text/plain" }).end("Movie not found");
+
+            writeMovies(filteredMovies, (err) => {
+                if (err) return res.writeHead(500, { "Content-Type": "text/plain" }).end("Error writing file");
+
+                res.writeHead(200, { "Content-Type": "text/plain" });
+                res.end("Movie deleted successfully");
+            });
+        });
+    }
+
+    // --- Route not found ---
+    else {
+        res.writeHead(404, { "Content-Type": "text/plain" });
+        res.end("Route not found");
+    }
+});
 const port = 2500;
 server.listen(port, () => {
     console.log(`Server is listening on port ${port}`);
