@@ -105,6 +105,40 @@ const server = http.createServer((req, res) => {
         });
     }
 });
+    // Update a movie
+else if (req.method === "PATCH" && req.url.startsWith("/movies/")) {
+    if (!id) {
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        return res.end("Invalid ID");
+    }
+
+    getRequestBody(req, (err, updates) => {
+        if (err) return res.writeHead(400, { "Content-Type": "text/plain" }).end("Invalid JSON");
+        if (Object.keys(updates).length === 0) 
+            return res.writeHead(400, { "Content-Type": "text/plain" }).end("No data to update");
+        if (updates.year !== undefined && typeof updates.year !== "number") 
+            return res.writeHead(400, { "Content-Type": "text/plain" }).end("Year must be a number");
+        if (updates.rating !== undefined && typeof updates.rating !== "number") 
+            return res.writeHead(400, { "Content-Type": "text/plain" }).end("Rating must be a number");
+
+        readMovies((err, movies) => {
+            if (err) 
+                return res.writeHead(500, { "Content-Type": "text/plain" }).end("Error reading file");
+
+            const index = movies.findIndex(m => m.id === id);
+            if (index === -1) 
+                return res.writeHead(404, { "Content-Type": "text/plain" }).end("Movie not found");
+
+            movies[index] = { ...movies[index], ...updates };
+
+            writeMovies(movies, (err) => {
+                if (err) return res.writeHead(500, { "Content-Type": "text/plain" }).end("Error writing file");
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(movies[index]));
+            });
+        });
+    });
+}
 
 const port = 2500;
 server.listen(port, () => {
