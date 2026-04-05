@@ -73,6 +73,37 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify(movie));
         });
     }
+    // Add a new movie
+    else if (req.method === "POST" && req.url === "/movies") {
+        getRequestBody(req, (err, newMovie) => {
+            if (err) {
+                res.writeHead(400, { "Content-Type": "text/plain" });
+                return res.end("Invalid JSON");
+            }
+
+            // Validation
+            if (!newMovie.title) 
+                return res.writeHead(400, { "Content-Type": "text/plain" }).end("Title is required");
+            if (newMovie.year !== undefined && typeof newMovie.year !== "number") 
+                return res.writeHead(400, { "Content-Type": "text/plain" }).end("Year must be a number");
+            if (newMovie.rating !== undefined && typeof newMovie.rating !== "number") 
+                return res.writeHead(400, { "Content-Type": "text/plain" }).end("Rating must be a number");
+            readMovies((err, movies) => {
+                if (err) 
+                    return res.writeHead(500, { "Content-Type": "text/plain" }).end("Error reading file");
+
+                newMovie.id = movies.length ? movies[movies.length - 1].id + 1 : 1;
+                movies.push(newMovie);
+
+                writeMovies(movies, (err) => {
+                    if (err) 
+                        return res.writeHead(500, { "Content-Type": "text/plain" }).end("Error writing file");
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify(newMovie));
+                });
+            });
+        });
+    }
 });
 
 const port = 2500;
